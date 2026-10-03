@@ -39,8 +39,9 @@
         <li><a href="#delta"><small>2024-06</small><strong>Delta rule</strong></a></li>
         <li><a href="#gated"><small>2024-12</small><strong>Gated DeltaNet</strong></a></li>
         <li><a href="#nsa"><small>2025-02</small><strong>NSA</strong></a></li>
-        <li><a href="#csa"><small>2025-09</small><strong>DeepSeek CSA</strong></a></li>
+        <li><a href="#dsa"><small>2025-09</small><strong>DeepSeek DSA</strong></a></li>
         <li><a href="#drope"><small>2025-12</small><strong>DroPE</strong></a></li>
+        <li><a href="#csa"><small>2026-04</small><strong>DeepSeek CSA</strong></a></li>
         <li><a href="#sources"><small>refs</small><strong>Sources</strong></a></li>
       </ol>
     </aside>
@@ -571,41 +572,27 @@ Sₜ = Sₜ₋₁ (I − βₜ kₜ kₜᵀ) + βₜ vₜ kₜᵀ</pre>
       </article>
 
       <!-- 18 -->
-      <article class="chapter" id="csa">
+      <article class="chapter" id="dsa">
         <header>
           <div class="meta">
-            <time datetime="2025-09">2025-09 → 2026-04</time>
+            <time datetime="2025-09">2025-09</time>
             <span class="priority sparse">sparse</span>
           </div>
-          <h3>DeepSeek compressed sparse attention</h3>
-          <p class="cite">
-            DSA in DeepSeek-V3.2-Exp (Sep 2025) / arXiv:2512.02556 ·
-            CSA+HCA hybrid in DeepSeek-V4 · arXiv:2606.19348 · 26 Apr 2026
-          </p>
+          <h3>DeepSeek Sparse Attention (DSA)</h3>
+          <p class="cite">DeepSeek-V3.2-Exp release · Sep 2025 · technical report arXiv:2512.02556 · 2 Dec 2025</p>
         </header>
         <p>
-          Two different savings stacked. Compress every m tokens into one KV summary (storage ↓).
-          Then run a cheap lightning indexer and keep only top-k summaries for expensive attention (reads ↓).
-          V4 interleaves CSA with Heavily Compressed Attention (larger m′, dense on the compressed lane) plus a small recent window so a token is not blind inside its own block.
+          Keep MLA’s latent KV path. Add a lightweight lightning indexer that scores context entries, then run fine-grained sparse attention only on the selected subset.
+          Continues V3.1 with the same MoE backbone so the quality comparison is almost an architecture A/B on sparsity alone.
         </p>
-        <pre class="formula">T tokens → ~T/m compressed entries → top-k reads
-indexer ranks; core attention mixes only survivors</pre>
-        <div class="lab" id="csa-lab">
-          <h4>Lab · compress, then select</h4>
-          <div class="controls">
-            <button type="button" data-k="1">top-1</button>
-            <button type="button" data-k="2" class="active">top-2</button>
-            <button type="button" data-k="3">top-3</button>
-          </div>
-          <div class="grid-viz" id="csa-cells"></div>
-          <p id="csa-note" class="hint"></p>
-        </div>
+        <pre class="formula">indexer scores candidates → top-k sparse attention on survivors
+(still token/latent entries — not yet block-compressed)</pre>
         <div class="trade">
-          <article class="buy"><h4>What it buys</h4><p>Road 2: architecture cheap enough to train and serve at extreme length. Reported V4 path makes ~1M-token context practical via hybrid CSA/HCA.</p></article>
-          <article class="give"><h4>What it gives up</h4><p>Token detail inside a block. Indexer mistakes skip whole regions. System complexity (cache layout, CP, mixed precision) explodes.</p></article>
-          <article class="when"><h4>When I'd choose it</h4><p>Native million-token agents/documents when stretch methods have hit their ceiling and you can pay the training/systems cost.</p></article>
+          <article class="buy"><h4>What it buys</h4><p>Long-context FLOPs and serving cost drop while keeping near-parity on the V3.1 benchmark suite in the reported Exp release.</p></article>
+          <article class="give"><h4>What it gives up</h4><p>Indexer errors skip tokens. You still store history at token/latent granularity—memory shrinks less than sequence compression will. Training the indexer adds complexity.</p></article>
+          <article class="when"><h4>When I'd choose it</h4><p>When MLA+GQA cache is under control but dense attention compute at long T is not—and you want a sparse retrofit on an existing DeepSeek-style stack.</p></article>
         </div>
-        <p class="bridge">Compression makes long training feasible. Separately, people still ask: can a short-trained RoPE model drop its positional scaffold and keep length generalization?</p>
+        <p class="bridge">Sparse selection helped compute. Position generalization was still a separate road. DroPE attacked the PE scaffold next.</p>
       </article>
 
       <!-- 19 -->
@@ -632,8 +619,43 @@ indexer ranks; core attention mixes only survivors</pre>
           <article class="give"><h4>What it gives up</h4><p>Needs a recalibration phase. Removes an inductive bias that helped training—done badly, short-context quality dips. Does not shrink KV or QK cost; it addresses position/generalization.</p></article>
           <article class="when"><h4>When I'd choose it</h4><p>When you already have a strong short-context RoPE model and want large extension without paying full native long training—after measuring the ceiling for your target.</p></article>
         </div>
+        <p class="bridge">Stretching position is one road. The other is making million-token training cheap enough to do natively—by compressing the sequence, then sparsifying.</p>
+      </article>
+
+      <!-- 20 -->
+      <article class="chapter" id="csa">
+        <header>
+          <div class="meta">
+            <time datetime="2026-04">2026-04</time>
+            <span class="priority sparse">sparse</span>
+          </div>
+          <h3>Compressed Sparse Attention (CSA)</h3>
+          <p class="cite">DeepSeek-V4 · arXiv:2606.19348 · 26 Apr 2026 · hybrid with Heavily Compressed Attention (HCA)</p>
+        </header>
+        <p>
+          Two different savings stacked on top of DSA. Compress every m tokens into one KV summary (storage ↓).
+          Then run the lightning indexer and keep only top-k summaries for expensive attention (reads ↓).
+          V4 interleaves CSA with HCA (larger m′, dense on the compressed lane) plus a small recent window so a token is not blind inside its own block.
+        </p>
+        <pre class="formula">T tokens → ~T/m compressed entries → top-k reads
+indexer ranks; core attention mixes only survivors</pre>
+        <div class="lab" id="csa-lab">
+          <h4>Lab · compress, then select</h4>
+          <div class="controls">
+            <button type="button" data-k="1">top-1</button>
+            <button type="button" data-k="2" class="active">top-2</button>
+            <button type="button" data-k="3">top-3</button>
+          </div>
+          <div class="grid-viz" id="csa-cells"></div>
+          <p id="csa-note" class="hint"></p>
+        </div>
+        <div class="trade">
+          <article class="buy"><h4>What it buys</h4><p>Road 2: architecture cheap enough to train and serve at extreme length. Reported V4 path makes ~1M-token context practical via hybrid CSA/HCA.</p></article>
+          <article class="give"><h4>What it gives up</h4><p>Token detail inside a block. Indexer mistakes skip whole regions. System complexity (cache layout, CP, mixed precision) explodes.</p></article>
+          <article class="when"><h4>When I'd choose it</h4><p>Native million-token agents/documents when stretch methods have hit their ceiling and you can pay the training/systems cost.</p></article>
+        </div>
         <p class="bridge">
-          Look back across the rail: exact global attention → decode memory → position → stretch → recurrent state → sparsity → aggressive compression.
+          Look back across the rail: exact global attention → decode memory → position → stretch → recurrent state → sparsity → drop the PE scaffold → aggressive compression.
           Priorities moved. Mechanisms did not “replace attention”; they paid different parts of its bill.
         </p>
       </article>
@@ -660,9 +682,9 @@ indexer ranks; core attention mixes only survivors</pre>
           <li><a href="https://arxiv.org/abs/2406.06484">Yang et al. 2024</a> — DeltaNet parallel delta rule (2024-06-10).</li>
           <li><a href="https://arxiv.org/abs/2412.06464">Yang et al. 2024</a> — Gated DeltaNet (2024-12-09).</li>
           <li><a href="https://arxiv.org/abs/2502.11089">Yuan et al. 2025</a> — Native Sparse Attention (2025-02-16).</li>
-          <li><a href="https://arxiv.org/abs/2512.02556">DeepSeek-AI 2025</a> — DeepSeek Sparse Attention in V3.2 (arXiv 2025-12-02; V3.2-Exp release Sep 2025).</li>
-          <li><a href="https://arxiv.org/abs/2606.19348">DeepSeek-AI 2026</a> — Compressed Sparse Attention / HCA in V4 (2026-04-26).</li>
+          <li><a href="https://arxiv.org/abs/2512.02556">DeepSeek-AI 2025</a> — DeepSeek Sparse Attention in V3.2 (V3.2-Exp Sep 2025; arXiv 2025-12-02).</li>
           <li><a href="https://arxiv.org/abs/2512.12167">Gelberg et al. 2025</a> — DroPE (2025-12-13).</li>
+          <li><a href="https://arxiv.org/abs/2606.19348">DeepSeek-AI 2026</a> — Compressed Sparse Attention / HCA in V4 (2026-04-26).</li>
         </ol>
         <footer>
           Built for ERA Session 8. Teaching metaphors follow the cohort notes; ordering follows primary sources, not lecture order.

@@ -47,8 +47,9 @@ Dates used for ordering are the **first public appearance** (arXiv *submitted* d
 | 15 | Delta rule / DeltaNet | 2024-06-10 | [arXiv:2406.06484](https://arxiv.org/abs/2406.06484) (rule lineage: Schlag et al. 2021) |
 | 16 | Gated DeltaNet | 2024-12-09 | [arXiv:2412.06464](https://arxiv.org/abs/2412.06464) |
 | 17 | Native Sparse Attention (extra) | 2025-02-16 | [arXiv:2502.11089](https://arxiv.org/abs/2502.11089) |
-| 18 | DeepSeek DSA / CSA | 2025-09 (DSA exp) · 2026-04-26 (CSA in V4) | [arXiv:2512.02556](https://arxiv.org/abs/2512.02556), [arXiv:2606.19348](https://arxiv.org/abs/2606.19348) |
+| 18 | DeepSeek Sparse Attention (DSA) | 2025-09-30 (V3.2-Exp) · paper 2025-12-02 | [arXiv:2512.02556](https://arxiv.org/abs/2512.02556) |
 | 19 | DroPE | 2025-12-13 | [arXiv:2512.12167](https://arxiv.org/abs/2512.12167) |
+| 20 | Compressed Sparse Attention (CSA) | 2026-04-26 | [arXiv:2606.19348](https://arxiv.org/abs/2606.19348) |
 
 ### Dating notes (where agents often go wrong)
 
@@ -56,7 +57,7 @@ Dates used for ordering are the **first public appearance** (arXiv *submitted* d
 - **YaRN arXiv id `2309.00071`:** submitted **2023-08-31** (September id, August submission).
 - **NTK-aware:** community post first (2023-06-29), not a standalone arXiv paper; YaRN cites and records the base-change formula.
 - **Delta rule:** associative delta updates are older (e.g. Schlag et al. 2021); the timeline entry is the **scalable DeltaNet** training paper (2024-06).
-- **DeepSeek “compressed sparse attention”:** DSA appears with V3.2-Exp (Sep 2025) / V3.2 report; **CSA** (compress-then-DSA) is specified in DeepSeek-V4 (2026-04). The page covers both stages of that line.
+- **DeepSeek DSA vs CSA:** DSA (sparse selection on latent/token entries) ships with V3.2-Exp (Sep 2025). **CSA** (compress blocks, then DSA) is specified in DeepSeek-V4 (2026-04). They are separate timeline entries because compression is a later cost lever.
 - **DroPE vs session “8K→256K” anecdotes:** DroPE is the public algorithm (drop PE after pretraining + recalibration). Specific V4 cookbook numbers are treated as run evidence, not as DroPE’s paper abstract.
 
 ## Design choices
