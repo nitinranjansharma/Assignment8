@@ -48,18 +48,17 @@
 
     <main>
       <header class="hero">
-        <p class="kicker">A chronological field story</p>
+        <p class="kicker">2017 → now</p>
         <h2>Standard attention solved one problem. Everything after attacked the bills it created.</h2>
         <p class="lede measure">
-          This is not a taxonomy. It is the order techniques actually appeared.
-          Each entry answers: what already existed, what hurt, what changed, what got cheaper, and what got worse.
+          Until attention, a token could be a beautiful vector and still know nothing about its neighbors.
+          Attention is where tokens start interacting. Later mechanisms appear here in the order they launched, each responding to a cost that came before.
         </p>
       </header>
 
       <section class="measure">
         <p>
-          Until attention, a token could be a beautiful 4,096-dimensional vector and still know nothing about its neighbors.
-          Attention is where tokens start interacting. We start there—exactly as the field did—and only then follow the costs that appeared.
+          We start with the ordinary mechanism, then follow what got expensive once context grew: pairwise compute, KV-cache memory, and the need for position.
         </p>
         <div class="flow" aria-hidden="true">
           <span>Q × K<em>scores</em></span>
@@ -654,16 +653,12 @@ indexer ranks; core attention mixes only survivors</pre>
           <article class="give"><h4>What it gives up</h4><p>Token detail inside a block. Indexer mistakes skip whole regions. System complexity (cache layout, CP, mixed precision) explodes.</p></article>
           <article class="when"><h4>When I'd choose it</h4><p>Native million-token agents/documents when stretch methods have hit their ceiling and you can pay the training/systems cost.</p></article>
         </div>
-        <p class="bridge">
-          Look back across the rail: exact global attention → decode memory → position → stretch → recurrent state → sparsity → drop the PE scaffold → aggressive compression.
-          Priorities moved. Mechanisms did not “replace attention”; they paid different parts of its bill.
-        </p>
       </article>
 
       <article class="chapter" id="sources">
         <header>
           <h3>Sources for the chronology</h3>
-          <p class="cite">Dates are first public appearance used for ordering: arXiv submitted date, or original post/release when that is the primary source.</p>
+          <p class="cite">Dates used for ordering: arXiv submitted date, or original post/release when that is the primary source.</p>
         </header>
         <ol class="sources">
           <li><a href="https://arxiv.org/abs/1706.03762">Vaswani et al. 2017</a> — scaled dot-product attention; sinusoidal PE (submitted 2017-06-12).</li>
@@ -687,8 +682,7 @@ indexer ranks; core attention mixes only survivors</pre>
           <li><a href="https://arxiv.org/abs/2606.19348">DeepSeek-AI 2026</a> — Compressed Sparse Attention / HCA in V4 (2026-04-26).</li>
         </ol>
         <footer>
-          Built for ERA Session 8. Teaching metaphors follow the cohort notes; ordering follows primary sources, not lecture order.
-          Interactive labs teach the mechanism—if a control does not change an idea, it does not belong here.
+          Interactive labs are included only where changing a control changes the idea.
         </footer>
       </article>
     </main>
